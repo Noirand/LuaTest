@@ -1,0 +1,5 @@
+return function()
+   coroutine.yield("こんにちは");
+   coroutine.yield("ADV の");
+   coroutine.yield("テストです");
+end

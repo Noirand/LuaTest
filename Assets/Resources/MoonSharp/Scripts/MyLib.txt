@@ -1,0 +1,7 @@
+function hoge()
+   ret = "require TEST!!"
+
+   print "ret"
+
+   return ret
+end

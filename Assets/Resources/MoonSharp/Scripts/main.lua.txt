@@ -1,0 +1,9 @@
+require 'MyLib'
+
+req = hoge()
+
+
+
+text = "日本語OK？"
+
+return {text, req}
