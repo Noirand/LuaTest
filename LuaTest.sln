@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{0E243A8D-B372-213B-E5D2-A760C3D8EF68}") = "LuaTest", "Assembly-CSharp.csproj", "{DB828D5F-2166-EF4A-85BF-611ACBC7E742}"
+EndProject
+Project("{0E243A8D-B372-213B-E5D2-A760C3D8EF68}") = "LuaTest", "Assembly-CSharp-Editor.csproj", "{F3927D76-4E81-50F5-E07F-6FD2DA30B92F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DB828D5F-2166-EF4A-85BF-611ACBC7E742}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB828D5F-2166-EF4A-85BF-611ACBC7E742}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB828D5F-2166-EF4A-85BF-611ACBC7E742}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB828D5F-2166-EF4A-85BF-611ACBC7E742}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3927D76-4E81-50F5-E07F-6FD2DA30B92F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3927D76-4E81-50F5-E07F-6FD2DA30B92F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3927D76-4E81-50F5-E07F-6FD2DA30B92F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3927D76-4E81-50F5-E07F-6FD2DA30B92F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal

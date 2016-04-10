@@ -18,6 +18,42 @@ public class CZLuaTest : MonoBehaviour {
 	//---------------------------------------------------
 	// public
 	//---------------------------------------------------
+	[MoonSharpUserData]
+	class MyLua {
+		CZLuaTest m_Parent;
+		public MyLua(CZLuaTest parent)
+		{
+			m_Parent = parent;
+		}
+
+		public void TimeWait()
+		{
+			if (m_Parent != null)
+				m_Parent.SetTimeWait();
+		}
+		public void KeyWait()
+		{
+			if (m_Parent != null)
+				m_Parent.SetKeyWait();
+		}
+		public void NoWait()
+		{
+			if (m_Parent != null)
+				m_Parent.SetNoWait();
+		}
+	}
+
+	public enum EZ_WAIT_KEY
+	{
+		 _NONE	// 待たない
+		,TIME	// 時間待ち
+		,KEY	// キー入力待ち
+	}
+
+	public EZ_WAIT_KEY	WaitKey		{ get; private set; }
+	public void	SetNoWait()		{ WaitKey = EZ_WAIT_KEY._NONE; }
+	public void	SetTimeWait()	{ WaitKey = EZ_WAIT_KEY.TIME; }
+	public void	SetKeyWait()	{ WaitKey = EZ_WAIT_KEY.KEY; }
 
 	//---------------------------------------------------
 	// private
@@ -37,8 +73,12 @@ public class CZLuaTest : MonoBehaviour {
 	//---------------------------------------------------
 	void Awake()
 	{
+		UserData.RegisterAssembly();
+
 		m_Text	= GetComponent<Text>();
 		m_Lua	= new Script();
+
+		WaitKey = EZ_WAIT_KEY._NONE;
 	}
 	//---------------------------------------------------
 	// 最初の更新
@@ -48,13 +88,15 @@ public class CZLuaTest : MonoBehaviour {
 		((ScriptLoaderBase)m_Lua.Options.ScriptLoader).ModulePaths = 
 			ScriptLoaderBase.UnpackStringPaths(UnityAssetsScriptLoader.DEFAULT_PATH + "/?");
 
+		m_Lua.Globals["obj"] = new MyLua(this);
+
 		var ret = m_Lua.DoFile("main.lua");//Script.RunFile("test");
 		Debug.Log( ret.Table );
 		if (ret.Table != null)
 		{
 			foreach (DynValue pKey in ret.Table.Keys)
 			{
-				Debug.Log(pKey + "," + ret.Table.Get(pKey));
+				Debug.Log(pKey.CastToString() + "," + ret.Table.Get(pKey));
 				m_Text.text += ret.Table.Get(pKey) + "\n";
 			}
 
@@ -98,12 +140,45 @@ public class CZLuaTest : MonoBehaviour {
 			//DynValue x = coroutine.Coroutine.Resume();
 			if (x.IsNotVoid())
 			{
-				m_Text.text += x + "\n";
+				//m_Text.text += x + "\n";
+				m_Text.text = x.CastToString();
 				Debug.Log(x);
 			}
-			yield return null;
+			switch (WaitKey)
+			{
+				case EZ_WAIT_KEY._NONE:
+					yield return null;
+					break;
+				case EZ_WAIT_KEY.TIME:
+					yield return new WaitForSeconds(3);
+					break;
+				case EZ_WAIT_KEY.KEY:
+					yield return new WaitUntil(() => Input.anyKeyDown);
+					break;
+			}
 		}
 	}
 	//---------------------------------------------------
 //===========================================================
 }
+
+//===========================================================
+//===========================================================
+#if false
+[MoonSharpUserData]
+class MyLua {
+	public void TimeWait()
+	{
+		CZLuaTest.SetTimeWait();
+	}
+	public void KeyWait()
+	{
+		CZLuaTest.SetKeyWait();
+	}
+	public void NoWait()
+	{
+		CZLuaTest.SetNoWait();
+	}
+}
+#endif
+//===========================================================

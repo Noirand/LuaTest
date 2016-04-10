@@ -1,5 +1,8 @@
 return function()
+   obj.timeWait();
    coroutine.yield("こんにちは");
+   obj.keyWait();
    coroutine.yield("ADV の");
+   obj.noWait();
    coroutine.yield("テストです");
 end
