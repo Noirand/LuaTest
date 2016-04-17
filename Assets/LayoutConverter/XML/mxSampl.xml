@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml">
+  <mx:Image id="image_01" source="image_01.png" x="0" y="0" width="512" height="128" />
+  <mx:Image id="image_02" source="image_02.png" x="568" y="0" width="512" height="128" />
+</mx:WindowedApplication>
+
