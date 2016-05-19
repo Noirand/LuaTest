@@ -1,3 +1,6 @@
+g_TalkChara = ""
+g_TalkWords = ""
+
 function hoge()
    ret = "require TEST!!"
 
@@ -5,3 +8,50 @@ function hoge()
 
    return ret
 end
+
+------------------------------------------------
+-- セリフ発言用コマンド
+------------------------------------------------
+function Talk(Chara, Words)
+   g_TalkChara = Chara
+   g_TalkWords = Words
+
+   return {g_TalkChara, g_TalkWords}
+end
+------------------------------------------------
+-- セリフ発言用コマンド（質問付き）
+------------------------------------------------
+function Ask(Chara, Words, ...)
+   g_TalkChara = Chara
+   g_TalkWords = Words
+   KeyWait()
+   
+   for i = 1, select("#", ...) do
+	  ask = select(i, ...)
+	  obj.addAsk(ask)
+   end
+end
+------------------------------------------------
+-- 各種待ちコマンド
+------------------------------------------------
+KeyWait = function()
+   coroutine.yield(obj.keyWait())
+end
+------------------------------------------------
+TimeWait = function()
+   coroutine.yield(obj.timeWait())
+end
+------------------------------------------------
+NoWait = function()
+   coroutine.yield(obj.noWait())
+end
+------------------------------------------------
+AnsWait = function()
+   coroutine.yield(obj.ansWait())
+end
+------------------------------------------------
+ActWait = function()
+   coroutine.yield(obj.actWait())
+end
+------------------------------------------------
+------------------------------------------------

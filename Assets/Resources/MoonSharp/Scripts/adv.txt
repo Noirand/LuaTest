@@ -1,8 +1,21 @@
+require 'MyLib'
+
 return function()
-   obj.timeWait();
-   coroutine.yield("こんにちは");
-   obj.keyWait();
-   coroutine.yield("ADV の");
-   obj.noWait();
-   coroutine.yield("テストです");
+   Talk("レッド", "こんにちは")
+   KeyWait()
+   Talk("グリーン", "こんにちは")
+   KeyWait()
+   --Ask("レッド", "いい天気ですね？", "はい", "いいえ")
+   --AnsWait()
+   Talk("レッド", "いい天気ですね")
+   KeyWait()
+   --[[
+   if obj.getAnswer() == 0 then
+	  Talk("グリーン", "そうですね\nいい天気です" .. g_TalkChara)
+   else
+	  Talk("グリーン", "そうですか？")
+   end
+   ]]
+   Talk("グリーン", "そうですね\nいい天気です")
+   KeyWait()
 end

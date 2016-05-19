@@ -6,7 +6,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-//using System.Collections.Generic;
+using System.Collections.Generic;
 //using System.Linq;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Loaders;
@@ -41,6 +41,27 @@ public class CZLuaTest : MonoBehaviour {
 			if (m_Parent != null)
 				m_Parent.SetNoWait();
 		}
+		public void AnsWait()
+		{
+			if (m_Parent != null)
+				m_Parent.SetAnsWait();
+		}
+		public void ActWait()
+		{
+			if (m_Parent != null)
+				m_Parent.SetActWait();
+		}
+		public void AddAsk(string sAsk)
+		{
+			if (m_Parent != null)
+				m_Parent.AddAsk(sAsk);
+		}
+		public int GetAnswer()
+		{
+			if (m_Parent != null)
+				return m_Parent.Answer;
+			return -1;
+		}
 	}
 
 	public enum EZ_WAIT_KEY
@@ -48,17 +69,27 @@ public class CZLuaTest : MonoBehaviour {
 		 _NONE	// 待たない
 		,TIME	// 時間待ち
 		,KEY	// キー入力待ち
+		,ANSWER	// 返答入力待ち
+		,ACTION	// アクション待ち
 	}
 
 	public EZ_WAIT_KEY	WaitKey		{ get; private set; }
+	public int			Answer		{ get; private set; }
 	public void	SetNoWait()		{ WaitKey = EZ_WAIT_KEY._NONE; }
 	public void	SetTimeWait()	{ WaitKey = EZ_WAIT_KEY.TIME; }
 	public void	SetKeyWait()	{ WaitKey = EZ_WAIT_KEY.KEY; }
+	public void SetAnsWait()	{ WaitKey = EZ_WAIT_KEY.ANSWER;	}
+	public void SetActWait()	{ WaitKey = EZ_WAIT_KEY.ACTION; }
 
 	//---------------------------------------------------
 	// private
 	//---------------------------------------------------
+	private GameObject		m_PrefAskPanel;
+	private List<Button>	m_AskList;
+
 	private Text	m_Text;
+	private Text	m_Name;
+	private string	m_CurMsg;
 
 	// lua 用クラス
 	private Script		m_Lua;
@@ -73,9 +104,12 @@ public class CZLuaTest : MonoBehaviour {
 	//---------------------------------------------------
 	void Awake()
 	{
+		Answer = -1;
+
 		UserData.RegisterAssembly();
 
 		m_Text	= GetComponent<Text>();
+		m_Name	= GameObject.Find("Name").GetComponent<Text>();
 		m_Lua	= new Script();
 
 		WaitKey = EZ_WAIT_KEY._NONE;
@@ -140,45 +174,81 @@ public class CZLuaTest : MonoBehaviour {
 			//DynValue x = coroutine.Coroutine.Resume();
 			if (x.IsNotVoid())
 			{
-				//m_Text.text += x + "\n";
 				m_Text.text = x.CastToString();
+				m_CurMsg	= "";
+
+				var textPut = StartCoroutine(PutText(m_Lua.Globals["g_TalkWords"].ToString()));
+				m_Name.text = m_Lua.Globals["g_TalkChara"].ToString();
+
 				Debug.Log(x);
+
+				yield return textPut;
+
+				switch (WaitKey)
+				{
+					case EZ_WAIT_KEY._NONE:
+						yield return null;
+						break;
+					case EZ_WAIT_KEY.TIME:
+						yield return new WaitForSeconds(3);
+						break;
+					case EZ_WAIT_KEY.KEY:
+						yield return new WaitUntil(() => Input.anyKeyDown);
+						break;
+					case EZ_WAIT_KEY.ANSWER:
+						if (m_AskList.Count > 0)
+						{
+							yield return new WaitUntil( () => (Answer != -1) );
+							Answer = -1;
+							for (int ii=0; ii<m_AskList.Count; ++ii)
+							{
+								Destroy(m_AskList[ii].gameObject);
+							}
+							m_AskList.Clear();
+						}
+						else {
+							goto case EZ_WAIT_KEY.KEY;
+						}
+						break;
+				}
 			}
-			switch (WaitKey)
-			{
-				case EZ_WAIT_KEY._NONE:
-					yield return null;
-					break;
-				case EZ_WAIT_KEY.TIME:
-					yield return new WaitForSeconds(3);
-					break;
-				case EZ_WAIT_KEY.KEY:
-					yield return new WaitUntil(() => Input.anyKeyDown);
-					break;
-			}
+		}
+	}
+	//--------------------------------------------------
+	// メッセージを1文字ずつ表示するコルーチン
+	//--------------------------------------------------
+	IEnumerator PutText(string sText)
+	{
+		int iNum = 0;
+
+		while (iNum < sText.Length)
+		{
+			m_CurMsg = sText.Substring(0, ++iNum);
+
+			m_Text.text = m_CurMsg;
+
+			yield return new WaitForSeconds(0.1f);
+		}
+	}
+	//--------------------------------------------------
+	// 質問追加
+	//--------------------------------------------------
+	public void AddAsk(string sAsk)
+	{
+		if (m_PrefAskPanel != null && m_AskList != null)
+		{
+			GameObject pObj = Instantiate(m_PrefAskPanel) as GameObject;
+			pObj.transform.SetParent(transform, false);
+			pObj.GetComponentInChildren<Text>().text = sAsk;
+
+			Button btn = pObj.GetComponent<Button>();
+			btn.onClick.AddListener( () => {
+				Answer = m_AskList.Count;
+				Debug.Log("(>_<)< Answer is: " + sAsk);
+			});
+			m_AskList.Add(btn);
 		}
 	}
 	//---------------------------------------------------
 //===========================================================
 }
-
-//===========================================================
-//===========================================================
-#if false
-[MoonSharpUserData]
-class MyLua {
-	public void TimeWait()
-	{
-		CZLuaTest.SetTimeWait();
-	}
-	public void KeyWait()
-	{
-		CZLuaTest.SetKeyWait();
-	}
-	public void NoWait()
-	{
-		CZLuaTest.SetNoWait();
-	}
-}
-#endif
-//===========================================================
