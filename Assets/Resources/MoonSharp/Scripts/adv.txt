@@ -5,17 +5,12 @@ return function()
    KeyWait()
    Talk("グリーン", "こんにちは")
    KeyWait()
-   --Ask("レッド", "いい天気ですね？", "はい", "いいえ")
-   --AnsWait()
-   Talk("レッド", "いい天気ですね")
-   KeyWait()
-   --[[
+   Ask("レッド", "いい天気ですね？", "はい", "いいえ")
+   AnsWait()
    if obj.getAnswer() == 0 then
 	  Talk("グリーン", "そうですね\nいい天気です" .. g_TalkChara)
    else
 	  Talk("グリーン", "そうですか？")
    end
-   ]]
-   Talk("グリーン", "そうですね\nいい天気です")
    KeyWait()
 end

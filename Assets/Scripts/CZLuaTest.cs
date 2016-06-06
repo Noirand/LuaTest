@@ -59,8 +59,12 @@ public class CZLuaTest : MonoBehaviour {
 		public int GetAnswer()
 		{
 			if (m_Parent != null)
-				return m_Parent.Answer;
-			return -1;
+			{
+				int iRet = m_Parent.Answer;
+				m_Parent.ResetAnswer();
+				return iRet;
+			}
+			return CZLuaTest.DZ_ANSWER_DEF;
 		}
 	}
 
@@ -75,6 +79,7 @@ public class CZLuaTest : MonoBehaviour {
 
 	public EZ_WAIT_KEY	WaitKey		{ get; private set; }
 	public int			Answer		{ get; private set; }
+	public void	ResetAnswer()	{ Answer = DZ_ANSWER_DEF; }
 	public void	SetNoWait()		{ WaitKey = EZ_WAIT_KEY._NONE; }
 	public void	SetTimeWait()	{ WaitKey = EZ_WAIT_KEY.TIME; }
 	public void	SetKeyWait()	{ WaitKey = EZ_WAIT_KEY.KEY; }
@@ -84,6 +89,8 @@ public class CZLuaTest : MonoBehaviour {
 	//---------------------------------------------------
 	// private
 	//---------------------------------------------------
+	private const int	DZ_ANSWER_DEF	= -1;
+
 	private GameObject		m_PrefAskPanel;
 	private List<Button>	m_AskList;
 
@@ -104,7 +111,9 @@ public class CZLuaTest : MonoBehaviour {
 	//---------------------------------------------------
 	void Awake()
 	{
-		Answer = -1;
+		m_PrefAskPanel = Resources.Load<GameObject>("Prefabs/Pref_AskPanel");
+		m_AskList = new List<Button>();
+		Answer = DZ_ANSWER_DEF;
 
 		UserData.RegisterAssembly();
 
@@ -198,11 +207,10 @@ public class CZLuaTest : MonoBehaviour {
 					case EZ_WAIT_KEY.ANSWER:
 						if (m_AskList.Count > 0)
 						{
-							yield return new WaitUntil( () => (Answer != -1) );
-							Answer = -1;
-							for (int ii=0; ii<m_AskList.Count; ++ii)
+							yield return new WaitUntil(() => (Answer != DZ_ANSWER_DEF));
+							for (int ii = 0; ii < m_AskList.Count; ++ii)
 							{
-								Destroy(m_AskList[ii].gameObject);
+								Destroy(m_AskList[ii].transform.parent.gameObject);
 							}
 							m_AskList.Clear();
 						}
@@ -211,6 +219,9 @@ public class CZLuaTest : MonoBehaviour {
 						}
 						break;
 				}
+			}
+			else {
+				// スクリプト終了処理
 			}
 		}
 	}
@@ -237,13 +248,19 @@ public class CZLuaTest : MonoBehaviour {
 	{
 		if (m_PrefAskPanel != null && m_AskList != null)
 		{
+			int i = m_AskList.Count;
 			GameObject pObj = Instantiate(m_PrefAskPanel) as GameObject;
 			pObj.transform.SetParent(transform, false);
-			pObj.GetComponentInChildren<Text>().text = sAsk;
+			pObj.name = "Ask_" + i;
 
-			Button btn = pObj.GetComponent<Button>();
+			//int iAbs = ((i % 2) == 0) ? -1 : 1;
+			Vector2 vPos = new Vector2(256 * i -128, 0);
+			pObj.transform.localPosition = vPos;
+
+			Button btn = pObj.GetComponentInChildren<Button>();
+			btn.GetComponentInChildren<Text>().text = sAsk;
 			btn.onClick.AddListener( () => {
-				Answer = m_AskList.Count;
+				Answer = i;
 				Debug.Log("(>_<)< Answer is: " + sAsk);
 			});
 			m_AskList.Add(btn);
