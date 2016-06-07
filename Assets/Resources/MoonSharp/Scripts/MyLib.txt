@@ -25,7 +25,8 @@ function Ask(Chara, Words, ...)
    g_TalkChara = Chara
    g_TalkWords = Words
    KeyWait()
-   
+   g_TalkWords = ""
+
    for i = 1, select("#", ...) do
 	  ask = select(i, ...)
 	  obj.addAsk(ask)

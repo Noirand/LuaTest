@@ -97,6 +97,7 @@ public class CZLuaTest : MonoBehaviour {
 	private Text	m_Text;
 	private Text	m_Name;
 	private string	m_CurMsg;
+	private bool	m_bMsgSkip;
 
 	// lua 用クラス
 	private Script		m_Lua;
@@ -114,6 +115,7 @@ public class CZLuaTest : MonoBehaviour {
 		m_PrefAskPanel = Resources.Load<GameObject>("Prefabs/Pref_AskPanel");
 		m_AskList = new List<Button>();
 		Answer = DZ_ANSWER_DEF;
+		m_bMsgSkip = false;
 
 		UserData.RegisterAssembly();
 
@@ -154,7 +156,10 @@ public class CZLuaTest : MonoBehaviour {
 	//---------------------------------------------------
 	void Update()
 	{
-	
+		if (Input.anyKeyDown)
+		{
+			m_bMsgSkip = true;
+		}
 	}
 	//---------------------------------------------------
 	// Lua のコルーチンてすと
@@ -183,15 +188,17 @@ public class CZLuaTest : MonoBehaviour {
 			//DynValue x = coroutine.Coroutine.Resume();
 			if (x.IsNotVoid())
 			{
-				m_Text.text = x.CastToString();
+				//m_Text.text = x.CastToString();
 				m_CurMsg	= "";
 
-				var textPut = StartCoroutine(PutText(m_Lua.Globals["g_TalkWords"].ToString()));
+				m_bMsgSkip = false;
+
+				var corPutText = StartCoroutine(PutText(m_Lua.Globals["g_TalkWords"].ToString()));
 				m_Name.text = m_Lua.Globals["g_TalkChara"].ToString();
 
 				Debug.Log(x);
 
-				yield return textPut;
+				yield return corPutText;
 
 				switch (WaitKey)
 				{
@@ -222,6 +229,7 @@ public class CZLuaTest : MonoBehaviour {
 			}
 			else {
 				// スクリプト終了処理
+				TryLuaCoroutine();
 			}
 		}
 	}
@@ -234,6 +242,15 @@ public class CZLuaTest : MonoBehaviour {
 
 		while (iNum < sText.Length)
 		{
+			if (m_bMsgSkip)
+			{
+				if (iNum > 0)
+				{
+					iNum = sText.Length - 1;
+					m_bMsgSkip = false;
+				}
+			}
+
 			m_CurMsg = sText.Substring(0, ++iNum);
 
 			m_Text.text = m_CurMsg;
@@ -254,7 +271,8 @@ public class CZLuaTest : MonoBehaviour {
 			pObj.name = "Ask_" + i;
 
 			//int iAbs = ((i % 2) == 0) ? -1 : 1;
-			Vector2 vPos = new Vector2(256 * i -128, 0);
+			Vector2 vPos = new Vector2(128 * Mathf.Cos((Mathf.PI * 2) / (i+1)),
+				128 * Mathf.Sin((Mathf.PI * 2) / (i+1)));
 			pObj.transform.localPosition = vPos;
 
 			Button btn = pObj.GetComponentInChildren<Button>();
